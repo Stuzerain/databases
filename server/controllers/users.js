@@ -1,9 +1,10 @@
 var models = require('../models');
+var db = require('../db');
 
 module.exports = {
   get: function (req, res) {
-    Message.findAll()
-      .complete((err, results) => {
+    db.User.findAll()
+      .then((err, results) => {
         res.json(results);
       });
 
@@ -19,9 +20,9 @@ module.exports = {
   },
   post: function (req, res) {
 
-    User.create({ username: req.body.username })
-      .complete((err, user) => {
-        res.sendStatus(201);
+    db.User.findOrCreate({ where: { username: req.body.username } })
+      .spread((user, result) => {
+        res.sendStatus(result ? 201 : 200);
       });
   }
 

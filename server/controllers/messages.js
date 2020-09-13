@@ -1,10 +1,11 @@
 var models = require('../models');
+var db = require('../db');
 
 module.exports = {
   get: function (req, res) {
 
-    Message.findAll({ include: [User] })
-      .complete((err, results) => {
+    db.Message.findAll({ include: [db.User] })
+      .then((err, results) => {
         res.json(results);
       });
 
@@ -14,18 +15,30 @@ module.exports = {
     // });
   }, // a function which handles a get request for all messages
   post: function (req, res) {
-    User.findOrCreate({ username: req.body.username })
-      .complete((err, user) => {
-        var info = {
+    db.User.findOrCreate({ where: { username: req.body.username } })
+      .spread((user, created) => {
+        db.Message.create({
+          userid: user.get('id'),
           text: req.body.body,
-          userid: user.id,
           roomname: req.body.roomname
-        };
-        Mesage.create(info)
-          .complete((err, results) => {
+        })
+          .then(message => {
             res.sendStatus(201);
           });
       });
+
+
+    // .then((err, user) => {
+    //   var info = {
+    //     text: req.body.body,
+    //     userid: user.id,
+    //     roomname: req.body.roomname
+    //   };
+    //   Mesage.create(info)
+    //     .then((err, results) => {
+    //       res.sendStatus(201);
+    //     });
+    // });
 
 
     // pre-ORM code
